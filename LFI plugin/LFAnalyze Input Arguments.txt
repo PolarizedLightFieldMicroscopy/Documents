@@ -1,0 +1,265 @@
+LFAnalyze Input Arguments.
+
+=============================================
+LFcalibrate
+
+    # Parse command line options
+    
+    "-o", "--output-filename", dest="output_filename",
+    help="Specify the name of the calibration file.")
+    
+	'', "--synthetic",
+    action="store_true", dest="synthetic_lf", default=False,
+    help="Use this option to create a synthetic light field (i.e. with no calibration image")
+
+    '', "--use-ray-optics",
+    action="store_true", dest="use_ray_optics", default=False,
+    help="Use the less accurate ray optics model rather than wave optics model.")
+    
+	'', "--voxels-as-points",
+    action="store_true", dest="voxels_as_points", default=False,
+    help="Treat each voxel as an ideal point source.  This turns of numerical integration that gives the voxel spatial extent (which can be important for anti-aliasing.")
+
+    # Calibration routine parameters
+	
+    "", "--dark-frame", dest="dark_frame_file", default=None,
+    help="Specify the a dark frame image to subtract from the input light-field before processing.  (This makes radiometric calibration more accurate.)")
+
+    "", "--radiometry-frame", dest="radiometry_frame_file", default=None,
+                      help="Specify the a radiometry frame to use for radiometric correction.  If no frame is specified, then no radiometric correction is carried out.")
+					  
+    "", "--align-radiometry", action="store_true", dest="align_radiometry", default=False,
+                      help="Align the radiometry image automatically to the geometric calibration image.  (use this option when the radiometry frame has been \"bumped\" before imaging begins.")
+
+    # Optical parameters
+	
+    '', "--pitch", dest="ulens_pitch", type=float, default=None,
+                      help="Specify the microlens pitch (in microns).")
+					  
+    '', "--pixel-size", dest="pixel_size", type=float, default=None,
+                      help="Specify the size of a pixel on the sensor, taking magnification due to relay optics into account (in microns).")
+					  
+    '', "--focal-length", dest="ulens_focal_length", type=float, default=2432.72,
+                      help="Specify the microlens focal length (in microns).")
+					  
+    '', "--ulens-focal-distance", dest="ulens_focal_distance", type=float, default=None,
+                      help="Specify the microlens focal distance (in microns).  If you do not specify a value, it is assumed that the focal distance is equal to the focal length.")
+					  
+    '', "--magnification", dest="objective_magnification", type=int, default=20,
+                      help="Specify the objective magnification.")
+					  
+    '', "--na", dest="objective_na", type=float, default = 0.5,
+                      help="Specify the objective numerical aperture.")
+					  
+    '', "--tubelens-focal-length", dest="tubelens_focal_length", type=float, default = 200.0,
+                      help="Tube lens focal length (in millimeters).")
+					  
+    '', "--wavelength", dest="center_wavelength", type=float, default = 509,
+                      help="Center wavelength of emission spectrum of the sample (nm).")
+					  
+    '', "--medium-index", dest="medium_index", type=float, default = 1.33,
+                      help="Set the index of refraction of the medium.")
+					  
+    '', "--ulens-fill-factor", dest="ulens_fill_factor", type=float, default=1.0,
+                      help="Specify the microlens fill factor (e.g. 1.0, 0.7, ...).")
+					  
+    '', "--pixel-fill-factor", dest="pixel_fill_factor", type=float, default=1.0,
+                      help="Specify the pixel fill factor (e.g. 1.0, 0.7, ...).")
+					  
+    '', "--ulens-profile", dest="ulens_profile", default='rect',
+                      help="Specify the shape of the microlens apertures.  Options include: ['rect', 'circ']")
+
+
+    # Volume parameters
+    
+	'', "--num-slices", dest="num_slices", type=int, default=30,
+                      help="Set the number of slices to produce in the output stacks.")
+    
+	'', "--um-per-slice", dest="um_per_slice", type=float, default=10.0,
+                      help="Set the thickness of each slice (in um).")
+    
+	'', "--z-center", dest="z_center", type=float, default=0.0,
+                      help="Set the offset for the central z slice (in um).")
+    
+	'', "--supersample", dest="supersample", type=int, default= 1,
+                      help="Supersample the light field volume.  This results in a higher resolution reconstruction up to a point, and interpolation after that point.")
+
+    # Geometric calibration Options
+    
+	"", "--affine-alignment", action="store_true", dest="affine_alignment", default=False,
+                      help="Use affine warp for correcting geometric distortion (default is cubic).")
+    
+	"", "--isometry-alignment", action="store_true", dest="isometry_alignment", default=False,
+                      help="Use isometry warp for correcting geometric distortion (default is cubic).")
+    
+	"--chief-ray", action="store_true", dest="chief_ray_image", default=False,
+                      help="Use this flag to indicate that the calibration frame is a chief ray image.")
+
+    # Synthetic parameters
+	
+    '', "--ns", dest="ns", type=int, default=50,
+                      help="Set the lenslets in s direction.")
+					  
+    '', "--nt", dest="nt", type=int, default=50,
+                      help="Set the lenslets in t direction.")
+    
+    # Other Options
+	
+   '', "--crop-center-lenslets",
+                      action="store_true", dest="crop_center_lenslets", default=False,
+                      help="For severe aperture vignetting (high NA objectives), use only center lenslets for calibration, and extrapolate outwards.")
+    '', "--skip-alignment",
+                      action="store_true", dest="skip_alignment", default=False,
+                      help="Skip the alignment step during geometric calibration (useful if you are working with an already-rectified light field or a synthetic light field.")
+    "", "--skip-subpixel-alignment", action="store_true", dest="skip_subpixel_alignment", default=False,
+                      help="Skip subpixel alignment for determining lenslet centers.")
+					  
+    '', "--num-threads", dest="num_threads", type=int, default=10,
+                      help="Set the number of CPU threads to use when generating the raydb.")
+					  
+    "", "--pinhole", dest="pinhole_filename", default=None,
+                      help="After calibrating, save the rectified light field as a rectified sub-aperture image.")
+					  
+    "", "--lenslet", dest="lenslet_filename", default=None,
+                      help="After calibrating, save the rectified light field as a rectified lenslet image.")
+					  
+    '-d', "--debug",
+                      action="store_true", dest="debug", default=False,
+                      help="Save debug images.")
+
+
+=========================================================
+	
+Rectify
+
+    "-p", "--output-pixels-per-lenslet", dest="output_pixels_per_lenslet",
+                      help="Specify the number of pixels per lenslet in the output image.")
+    "-o", "--output-file", dest="output_filename",
+                      help="Specify the output filename.")
+    "-c", "--calibration-file", dest="calibration_file",
+                      help="Specify the calibration file to use for rectification.")
+    '-s', "--subaperture",
+                      action="store_true", dest="subaperture", default=False,
+                      help="Save out the light field image as tiled subapertures.")
+
+	
+=========================================================
+print 'LFdeconvolve v%s' % (lflib.version)
+
+    'input_file', 
+    help="You must supply at least one light field image "
+    "to deconvolve.")
+	
+    "-o", "--output-file", dest="output_filename",
+    help="Specify the output filename.")
+	
+    "-c", "--calibration-file", dest="calibration_file", 
+                        help="Specify the calibration file to use for rectification.")
+						
+    key_def = os.path.join(os.path.dirname(os.path.abspath(__file__)), 
+                           'enlightenment_c3')
+						   
+    "--private-key", dest="private_fn", type=str, 
+    default=key_def, 
+    help="Specify the private key file for remote transfers.")
+	
+    "--cov-directory", dest="cov_directory",
+    help="Specify the directory where ADMM covariance matrices are saved.")
+
+    # Algorithm selection
+	
+    "--solver", dest="solver", default='rl',
+    help= "Available reconstruction methods are: "
+       " Approximate Message Passing (with optional multiscale denoising ('amp'), " +
+       " Alternating Direction Method of Multipliers with Huber loss ('admm_huber'), "+
+       " Alternating Direction Method of Multipliers with TV penalty ('admm_tv), " +
+       " Conjugate Gradient ('cg'), " + 
+       " Direct method with Cholesky factorization ('direct'), " +
+       " Least Squares QR ('lsqr'), " + 
+       " K-space deconvolution ('kspace'), " +
+       " Simultaneous Iterative Reconstruction Technique ('sirt'), " +
+       " MRNSD ('mrnsd')," + 
+       " and Richardson-Lucy ('rl'). Default is currently 'sirt'.")
+
+    # Algorithm-specific parameters
+	
+    "--alpha", dest="alpha", type=float, default=1.6,
+    help="Relaxation parameter for SIRT-based iterative reconstruction.")
+	
+    "--multiscale-smoothing", 
+    dest="multiscale_smoothing", action="store_true",
+    default=False, 
+    help="Multiscale regularization option for AMP reconstruction.")
+	
+    "--save-multiscale", dest="save_multiscale", action="store_true",
+    default=False, help="Save multilevel decomposition of data.")
+    
+	# Generic parameters for iterative reconstruction routines
+    
+	"--lambda", dest="regularization_lambda", 
+    type=float, default=0.0,
+    help="Regularization coefficient (behavior varies by reconstruction algorithm)")
+	
+    "--lambda2", dest="regularization_lambda2", type=float, default=0.0,
+    help=("Additional regularization coefficient. "
+        "(Behavior varies by algorithm, and not all algorithms use "
+        "two regularization coefficients.)"))
+		
+    "--max-iter", dest="max_iter", type=int, default=15,
+    help="Maximum number of iterations for SIRT-based reconstruction.")
+    "--convergence-threshold", dest="conv_thresh", type=float, default= 0.0,
+    help=("Convergence criteria threshold, d/dt (MSE). "
+        "Try 5e-5 for SIRT, 1e-2 for TV."))
+
+    # Noise model parameters
+    "--readnoise-variance", dest="readnoise_variance", type=float, default=0.0,
+    help="Set the variance of the (measured) camera read noise.")
+	
+    "--background-level", dest="background_level", type=float, default=1.0,
+    help="Set the (measured) background level of the image.")
+
+    # Assorted other parameters
+    "--disable-gpu",
+                      action="store_true", dest="disable_gpu", default=False,
+                      help="Disable GPU deconvolution, and use software implementation instead.")
+
+    # if --gpu-id is not supplied it will default to the value of the USE_GPU_ID environment 
+    # variable, if set, or 1 otherwise.
+    "--gpu-id", dest="gpu_id", type=int, default=int(os.environ.get('USE_GPU_ID', 1)),
+    help="Force lfdeconvolve to use a specific GPU on your system. If not supplied this will default to $USE_GPU_ID or 1")
+    
+	"--focalstack",
+    action="store_true", dest="focalstack", default=False,
+    help="Turn off deconvolution and simply save a focal stack to disk.")
+    
+	"--remove-grid",
+    action="store_true", dest="remove_grid", default=False,
+    help="Remove grid artifacts in light field image using spectral median filter.")
+    
+	"-p", "--pinhole-file", dest="pinhole_filename", default=None,
+    help="After deconvolution, save out a deconvolved light field sub-aperture image.")
+    
+	"--deconvolution-type", dest="decon_type", default='algebraic',
+    help="Choose deconvolution method. One of [algebraic, direct, admm].")
+    
+	"--reg-factor", dest="reg_factor", type=float, default=100.,
+    help="Regularization parameter used in ADMM.")
+    
+	"--h5py-cov-filename", dest="h5py_cov_filename", 
+    default='tests/covariance_blocks.h5',
+    help="Specify the HDF5 covariance filename.")
+    
+	"--direct-type", dest="direct_type", default="covariance",
+      help="If --direct flag is set to True, specifies "
+      "whether the covariance or projection matrix method is used.")
+    
+	"--benchmark",
+    action="store_true", dest="benchmark", default=False,
+    help="Compare the CPU and GPU speeds for forward & back porjection operations.")
+    
+	"--test", dest="test", type=int, help="Select a unit test (1-4).")
+    
+	"--log-convergence",
+    action="store_true", dest="log_convergence", default=False,
+                      help="For logging convergence details.")
+ 
